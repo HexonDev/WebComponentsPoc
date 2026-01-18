@@ -201,13 +201,7 @@
     <p style="font-size: 14px; color: #6b7280;">
       Az eseményeket HTML attribútumként is megadhatod, mint a natív <code>onclick</code>!
     </p>
-    
-    <div style="background: #1f2937; color: #e5e7eb; padding: 16px; border-radius: 8px; margin-bottom: 16px; font-family: monospace; font-size: 12px;">
-      <div style="color: #9ca3af;">HTML attribútumok:</div>
-      <div style="color: #22c55e;">on-row-deleted="handleAttributeDelete"</div>
-      <div style="color: #22c55e;">on-data-changed="handleAttributeDataChange"</div>
-    </div>
-    
+
     <button onclick="addAttributeRow()" style="margin-bottom: 16px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">
       Új sor hozzáadása
     </button>
@@ -245,11 +239,6 @@
     <p style="font-size: 14px; color: #6b7280;">
       A <code>&lt;data-table-wrapper&gt;</code> teljesen önellátó: ő tudja az oszlopokat, kéri le az adatokat és saját belső template-et használ.
     </p>
-    
-    <div style="background: #1f2937; color: #e5e7eb; padding: 16px; border-radius: 8px; margin-bottom: 16px; font-family: monospace; font-size: 12px;">
-      <div style="color: #9ca3af;">HTML használat (szuper egyszerű):</div>
-      <div style="color: #22c55e;">&lt;data-table-wrapper api-url="https://jsonplaceholder.typicode.com/users"&gt;&lt;/data-table-wrapper&gt;</div>
-    </div>
     
     <data-table-wrapper api-url="https://jsonplaceholder.typicode.com/users"></data-table-wrapper>
 
