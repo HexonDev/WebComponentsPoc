@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Table Web Component Demo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f9fafb;
+    }
+    
+    h1 {
+      color: #1f2937;
+      margin-bottom: 12px;
+    }
+    
+    p {
+      color: #6b7280;
+      margin-bottom: 32px;
+    }
+    
+    .demo-section {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 24px;
+    }
+    
+    .code-block {
+      background: #1f2937;
+      color: #e5e7eb;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+    
+    code {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎉 Data Table Web Component Demo</h1>
+  <p>Ez egy standalone Web Component, ami Angular Elements-szel készült, de használható Angular nélkül is!</p>
+
+  <div class="demo-section">
+    <h2>Példa 1: Attribútumokkal (JSON stringként)</h2>
+    <data-table 
+      id="table1"
+      columns='[{"key":"id","label":"ID","sortable":true},{"key":"name","label":"Név","sortable":true},{"key":"email","label":"E-mail","sortable":true}]'
+      data='[{"id":1,"name":"Kovács János","email":"kovacs.janos@example.com"},{"id":2,"name":"Nagy Anna2","email":"nagy.anna@example.com"}]'>
+    </data-table>
+  </div>
+
+  <div class="demo-section">
+    <h2>Példa 2: Window property-kből</h2>
+    <p style="font-size: 14px; color: #6b7280;">Az adatok a <code>window.tableConfig</code> és <code>window.serverData</code> objektumokból jönnek</p>
+    <data-table id="table2"></data-table>
+  </div>
+
+  <div class="demo-section">
+    <h2>Példa 3: JavaScript property-kkel</h2>
+    <data-table id="table3"></data-table>
+  </div>
+
+  <div class="demo-section">
+    <h2>Példa 4: Dinamikus adatfrissítés</h2>
+    <button onclick="addRow()" style="margin-bottom: 16px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">
+      Új sor hozzáadása
+    </button>
+    <data-table id="table4"></data-table>
+  </div>
+
+  <div class="demo-section">
+    <h2>Példa 5: Automatikus window betöltés</h2>
+    <p style="font-size: 14px; color: #6b7280;">Ez a táblázat automatikusan betölti az adatokat a <code>window.tableConfig</code>-ból, JavaScript kód nélkül!</p>
+    <data-table></data-table>
+  </div>
+
+  <div class="demo-section">
+    <h2>Példa 6: Realtime adatfrissítés</h2>
+    <p style="font-size: 14px; color: #6b7280;">
+      <span style="color: #16a34a; font-weight: 600;">✓ Property-alapú</span> - Hatékony realtime frissítés<br>
+      <span style="color: #dc2626; font-weight: 600;">✗ Attribútum-alapú</span> - Lassú, sok stringify
+    </p>
+    <button onclick="toggleRealtime()" id="realtimeBtn" style="margin-bottom: 16px; padding: 8px 16px; background: #16a34a; color: white; border: none; border-radius: 6px; cursor: pointer;">
+      Realtime indítása
+    </button>
+    <span id="updateCounter" style="margin-left: 12px; font-size: 14px; color: #6b7280;"></span>
+    <data-table id="realtimeTable"></data-table>
+  </div>
+
+  <div class="demo-section">
+    <h2>Példa 7: Output események (rowAdded, rowDeleted, dataChanged)</h2>
+    <p style="font-size: 14px; color: #6b7280;">
+      A táblázat eseményeket bocsát ki amikor változik az adat. Próbáld ki: töröld vagy adj hozzá sort!
+    </p>
+    
+    <button onclick="addEventRow()" style="margin-bottom: 16px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">
+      Új sor hozzáadása (rowAdded esemény)
+    </button>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+      <div>
+        <h3 style="margin-bottom: 12px; font-size: 16px;">Táblázat (törlés: rowDeleted esemény)</h3>
+        <data-table id="eventTable"></data-table>
+      </div>
+      
+      <div>
+        <h3 style="margin-bottom: 12px; font-size: 16px;">Esemény Log</h3>
+        <div id="eventLog" style="background: #1f2937; color: #e5e7eb; padding: 16px; border-radius: 8px; height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px;">
+          <div style="color: #9ca3af;">Események itt jelennek meg...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Példa 8: Attribútum-alapú event handler-ek</h2>
+    <p style="font-size: 14px; color: #6b7280;">
+      Az eseményeket HTML attribútumként is megadhatod, mint a natív <code>onclick</code>!
+    </p>
+    
+    <div style="background: #1f2937; color: #e5e7eb; padding: 16px; border-radius: 8px; margin-bottom: 16px; font-family: monospace; font-size: 12px;">
+      <div style="color: #9ca3af;">HTML attribútumok:</div>
+      <div style="color: #22c55e;">on-row-deleted="handleAttributeDelete"</div>
+      <div style="color: #22c55e;">on-data-changed="handleAttributeDataChange"</div>
+    </div>
+    
+    <button onclick="addAttributeRow()" style="margin-bottom: 16px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">
+      Új sor hozzáadása
+    </button>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+      <div>
+        <h3 style="margin-bottom: 12px; font-size: 16px;">Táblázat (attribútum-alapú event-ek)</h3>
+        <data-table 
+          id="attributeTable"
+          on-row-deleted="handleAttributeDelete"
+          on-data-changed="handleAttributeDataChange">
+        </data-table>
+      </div>
+      
+      <div>
+        <h3 style="margin-bottom: 12px; font-size: 16px;">Callback Log</h3>
+        <div id="attributeLog" style="background: #1f2937; color: #e5e7eb; padding: 16px; border-radius: 8px; height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px;">
+          <div style="color: #9ca3af;">Callback-ek itt jelennek meg...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Példa 9: Teljesen kapszulázott API komponens</h2>
+    <p style="font-size: 14px; color: #6b7280;">
+      A <code>&lt;data-table-wrapper&gt;</code> teljesen önellátó: ő tudja az oszlopokat, kéri le az adatokat és saját belső template-et használ.
+    </p>
+    
+    <div style="background: #1f2937; color: #e5e7eb; padding: 16px; border-radius: 8px; margin-bottom: 16px; font-family: monospace; font-size: 12px;">
+      <div style="color: #9ca3af;">HTML használat (szuper egyszerű):</div>
+      <div style="color: #22c55e;">&lt;data-table-wrapper api-url="https://jsonplaceholder.typicode.com/users"&gt;&lt;/data-table-wrapper&gt;</div>
+    </div>
+    
+    <data-table-wrapper api-url="https://jsonplaceholder.typicode.com/users"></data-table-wrapper>
+  </div>
+
+  <div class="demo-section">
+    <h2>Használat</h2>
+    <p>Négyféleképpen használhatod:</p>
+    
+    <h3>1. HTML Attribútumokkal (JSON string)</h3>
+    <div class="code-block">
+      <code>
+&lt;data-table 
+  columns='[{"key":"id","label":"ID","sortable":true}]'
+  data='[{"id":1,"name":"Teszt"}]'&gt;
+&lt;/data-table&gt;
+      </code>
+    </div>
+
+    <h3 style="margin-top: 24px;">2. Window Property-kből (server-side rendering)</h3>
+    <div class="code-block">
+      <code>
+&lt;!-- Backend által generált adatok --&gt;<br>
+&lt;script&gt;<br>
+&nbsp;&nbsp;window.tableConfig = { columns: [...], data: [...] };<br>
+&lt;/script&gt;<br><br>
+&lt;data-table id="myTable"&gt;&lt;/data-table&gt;<br><br>
+&lt;script&gt;<br>
+&nbsp;&nbsp;const table = document.getElementById('myTable');<br>
+&nbsp;&nbsp;table.columns = window.tableConfig.columns;<br>
+&nbsp;&nbsp;table.data = window.tableConfig.data;<br>
+&lt;/script&gt;
+      </code>
+    </div>
+
+    <h3 style="margin-top: 24px;">3. JavaScript Property-kkel</h3>
+    <div class="code-block">
+      <code>
+&lt;data-table id="myTable"&gt;&lt;/data-table&gt;<br><br>
+&lt;script&gt;<br>
+&nbsp;&nbsp;const table = document.getElementById('myTable');<br>
+&nbsp;&nbsp;table.columns = [{ key: 'id', label: 'ID', sortable: true }];<br>
+&nbsp;&nbsp;table.data = [{ id: 1, name: 'Teszt' }];<br>
+&lt;/script&gt;
+      </code>
+    </div>
+
+    <h3 style="margin-top: 24px;">4. Automatikus window betöltés</h3>
+    <div class="code-block">
+      <code>
+&lt;!-- Backend által generált adatok --&gt;<br>
+&lt;script&gt;<br>
+&nbsp;&nbsp;window.tableConfig = {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;columns: [{ key: 'id', label: 'ID', sortable: true }],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;data: [{ id: 1, name: 'Teszt' }]<br>
+&nbsp;&nbsp;};<br>
+&lt;/script&gt;<br><br>
+&lt;!-- Automatikusan betöltődik, nincs szükség JS kódra! --&gt;<br>
+&lt;data-table&gt;&lt;/data-table&gt;
+      </code>
+    </div>
+  </div>
+
+  <!-- Web Component bundle betöltése - build után lesz elérhető -->
+  <script src="dist/WebComponentsPoc/browser/main.js"></script>
+
+  <script>
+    // Példa: Backend által generált globális adatok (server-side rendering scenario)
+    window.tableConfig = {
+      columns: [
+        { key: 'id', label: 'ID', sortable: true },
+        { key: 'category', label: 'Kategória', sortable: true },
+        { key: 'description', label: 'Leírás', sortable: false }
+      ],
+      data: [
+        { id: 1, category: 'Backend', description: 'Node.js API fejlesztés' },
+        { id: 2, category: 'Frontend', description: 'React komponensek' },
+        { id: 3, category: 'DevOps', description: 'CI/CD pipeline' }
+      ]
+    };
+
+    window.serverData = [
+      { id: 1, user: 'admin', action: 'login', time: '09:15' },
+      { id: 2, user: 'user1', action: 'upload', time: '10:23' },
+      { id: 3, user: 'user2', action: 'download', time: '11:47' }
+    ];
+
+    // Várunk, amíg a custom element regisztrálva lesz
+    customElements.whenDefined('data-table').then(() => {
+      // Második táblázat: Window property-kből
+      const table2 = document.getElementById('table2');
+      // Window property-kből töltjük be az adatokat (server-side rendering scenario)
+      table2.columns = window.tableConfig.columns;
+      table2.data = window.tableConfig.data;
+
+      // Harmadik táblázat: JavaScript property-kkel
+      const table3 = document.getElementById('table3');
+      table3.columns = [
+        { key: 'id', label: 'ID', sortable: true },
+        { key: 'name', label: 'Név', sortable: true },
+        { key: 'email', label: 'E-mail', sortable: true },
+        { key: 'role', label: 'Szerepkör', sortable: true },
+        { key: 'status', label: 'Státusz', sortable: false }
+      ];
+      
+      table3.data = [
+        { id: 1, name: 'Kovács János', email: 'kovacs.janos@example.com', role: 'Admin', status: 'Aktív' },
+        { id: 2, name: 'Nagy Anna', email: 'nagy.anna@example.com', role: 'Felhasználó', status: 'Aktív' },
+        { id: 3, name: 'Szabó Péter', email: 'szabo.peter@example.com', role: 'Moderátor', status: 'Inaktív' },
+        { id: 4, name: 'Tóth Katalin', email: 'toth.katalin@example.com', role: 'Felhasználó', status: 'Aktív' },
+        { id: 5, name: 'Kiss László', email: 'kiss.laszlo@example.com', role: 'Admin', status: 'Aktív' }
+      ];
+
+      // Negyedik táblázat: Dinamikus adatok
+      const table4 = document.getElementById('table4');
+      table4.columns = [
+        { key: 'id', label: 'ID', sortable: true },
+        { key: 'product', label: 'Termék', sortable: true },
+        { key: 'price', label: 'Ár', sortable: true }
+      ];
+      
+      table4.data = [
+        { id: 1, product: 'Laptop', price: '150.000 Ft' },
+        { id: 2, product: 'Monitor', price: '45.000 Ft' }
+      ];
+
+      // Esemény táblázat inicializálása
+      const eventTable = document.getElementById('eventTable');
+      eventTable.columns = [
+        { key: 'id', label: 'ID', sortable: true },
+        { key: 'name', label: 'Termék', sortable: true },
+        { key: 'quantity', label: 'Mennyiség', sortable: true }
+      ];
+      
+      eventTable.data = [
+        { id: 1, name: 'Egér', quantity: 5 },
+        { id: 2, name: 'Billentyűzet', quantity: 3 },
+        { id: 3, name: 'Monitor', quantity: 2 }
+      ];
+
+      // Event listener-ek beállítása
+      eventTable.addEventListener('rowDeleted', (event) => {
+        logEvent('rowDeleted', event.detail);
+      });
+
+      eventTable.addEventListener('rowAdded', (event) => {
+        logEvent('rowAdded', event.detail);
+      });
+
+      eventTable.addEventListener('dataChanged', (event) => {
+        logEvent('dataChanged', { rowCount: event.detail.length });
+      });
+
+      // Attribútum táblázat inicializálása
+      const attributeTable = document.getElementById('attributeTable');
+      attributeTable.columns = [
+        { key: 'id', label: 'ID', sortable: true },
+        { key: 'item', label: 'Termék', sortable: true },
+        { key: 'stock', label: 'Készlet', sortable: true }
+      ];
+      
+      attributeTable.data = [
+        { id: 1, item: 'iPhone', stock: 12 },
+        { id: 2, item: 'iPad', stock: 8 },
+        { id: 3, item: 'MacBook', stock: 5 }
+      ];
+    });
+
+    // Globális callback függvények (attribútum-alapú event-ekhez)
+    window.handleAttributeDelete = function(row) {
+      logAttributeEvent('handleAttributeDelete', row);
+    };
+
+    window.handleAttributeDataChange = function(data) {
+      logAttributeEvent('handleAttributeDataChange', { rowCount: data.length });
+    };
+
+    let nextId = 3;
+    function addRow() {
+      const table4 = document.getElementById('table4');
+      const products = ['Egér', 'Billentyűzet', 'Headset', 'Webcam', 'USB Hub'];
+      const randomProduct = products[Math.floor(Math.random() * products.length)];
+      const randomPrice = Math.floor(Math.random() * 50000) + 10000;
+      
+      table4.data = [
+        ...table4.data,
+        { id: nextId++, product: randomProduct, price: randomPrice.toLocaleString('hu-HU') + ' Ft' }
+      ];
+    }
+
+    // Realtime frissítés példa
+    let realtimeInterval = null;
+    let updateCount = 0;
+    let isRunning = false;
+
+    function toggleRealtime() {
+      const btn = document.getElementById('realtimeBtn');
+      const counter = document.getElementById('updateCounter');
+      
+      if (isRunning) {
+        // Leállítás
+        clearInterval(realtimeInterval);
+        btn.textContent = 'Realtime indítása';
+        btn.style.background = '#16a34a';
+        isRunning = false;
+      } else {
+        // Indítás
+        const realtimeTable = document.getElementById('realtimeTable');
+        realtimeTable.columns = [
+          { key: 'timestamp', label: 'Időbélyeg', sortable: true },
+          { key: 'value', label: 'Érték', sortable: true },
+          { key: 'status', label: 'Státusz', sortable: false }
+        ];
+        
+        btn.textContent = 'Realtime leállítása';
+        btn.style.background = '#dc2626';
+        isRunning = true;
+        updateCount = 0;
+
+        // Realtime adatfrissítés - property-alapú (hatékony)
+        realtimeInterval = setInterval(() => {
+          updateCount++;
+          const now = new Date();
+          const timestamp = now.toLocaleTimeString('hu-HU');
+          const value = Math.floor(Math.random() * 100);
+          const statuses = ['Aktív', 'Várakozik', 'Feldolgozva'];
+          const status = statuses[Math.floor(Math.random() * statuses.length)];
+          
+          // Property-alapú frissítés - egyszerűen átadjuk az új adatot
+          realtimeTable.data = [
+            { timestamp, value: value + ' %', status },
+            ...realtimeTable.data.slice(0, 9) // Max 10 sor
+          ];
+          
+          counter.textContent = `Frissítések: ${updateCount}`;
+        }, 1000); // Másodpercenként frissít
+      }
+    }
+
+    // Event log helper
+    function logEvent(eventName, data) {
+      const log = document.getElementById('eventLog');
+      const timestamp = new Date().toLocaleTimeString('hu-HU');
+      const color = eventName === 'rowDeleted' ? '#ef4444' : eventName === 'rowAdded' ? '#22c55e' : '#3b82f6';
+      
+      const entry = document.createElement('div');
+      entry.style.marginBottom = '8px';
+      entry.style.paddingBottom = '8px';
+      entry.style.borderBottom = '1px solid #374151';
+      entry.innerHTML = `
+        <span style="color: #9ca3af;">[${timestamp}]</span>
+        <span style="color: ${color}; font-weight: bold;">${eventName}</span>
+        <pre style="margin: 4px 0 0 0; color: #e5e7eb;">${JSON.stringify(data, null, 2)}</pre>
+      `;
+      
+      log.insertBefore(entry, log.firstChild);
+      
+      // Max 10 esemény
+      while (log.children.length > 10) {
+        log.removeChild(log.lastChild);
+      }
+    }
+
+    // Új sor hozzáadása az esemény táblához
+    let eventRowId = 4;
+    function addEventRow() {
+      const eventTable = document.getElementById('eventTable');
+      const products = ['Headset', 'Webcam', 'USB Hub', 'Pendrive', 'Laptop táska'];
+      const randomProduct = products[Math.floor(Math.random() * products.length)];
+      const randomQuantity = Math.floor(Math.random() * 10) + 1;
+      
+      const newRow = { 
+        id: eventRowId++, 
+        name: randomProduct, 
+        quantity: randomQuantity 
+      };
+      
+      eventTable.data = [newRow, ...eventTable.data];
+      
+      // Manuálisan is kibocsáthatjuk az eseményt (de a komponens is kibocsátja)
+      eventTable.dispatchEvent(new CustomEvent('rowAdded', { detail: newRow }));
+    }
+
+    // Attribútum log helper
+    function logAttributeEvent(callbackName, data) {
+      const log = document.getElementById('attributeLog');
+      const timestamp = new Date().toLocaleTimeString('hu-HU');
+      
+      const entry = document.createElement('div');
+      entry.style.marginBottom = '8px';
+      entry.style.paddingBottom = '8px';
+      entry.style.borderBottom = '1px solid #374151';
+      entry.innerHTML = `
+        <span style="color: #9ca3af;">[${timestamp}]</span>
+        <span style="color: #f59e0b; font-weight: bold;">${callbackName}()</span>
+        <pre style="margin: 4px 0 0 0; color: #e5e7eb;">${JSON.stringify(data, null, 2)}</pre>
+      `;
+      
+      log.insertBefore(entry, log.firstChild);
+      
+      // Max 10 esemény
+      while (log.children.length > 10) {
+        log.removeChild(log.lastChild);
+      }
+    }
+
+    // Új sor hozzáadása az attribútum táblához
+    let attributeRowId = 4;
+    function addAttributeRow() {
+      const attributeTable = document.getElementById('attributeTable');
+      const items = ['AirPods', 'Apple Watch', 'Magic Mouse', 'Magic Keyboard'];
+      const randomItem = items[Math.floor(Math.random() * items.length)];
+      const randomStock = Math.floor(Math.random() * 20) + 1;
+      
+      const newRow = { 
+        id: attributeRowId++, 
+        item: randomItem, 
+        stock: randomStock 
+      };
+      
+      attributeTable.data = [newRow, ...attributeTable.data];
+    }
+  </script>
+</body>
+</html>

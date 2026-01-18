@@ -1,0 +1,41 @@
+<div class="data-table-container">
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th *ngFor="let column of columns" (click)="onSort(column)" [class.sortable]="column.sortable">
+            <div class="header-content">
+              <span>{{ column.label }}</span>
+              <span class="sort-icon" *ngIf="column.sortable">{{ getSortIcon(column) }}</span>
+            </div>
+          </th>
+          <th class="action-column">Műveletek</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of data">
+          <td *ngFor="let column of columns">
+            <ng-container *ngIf="cellTemplate; else defaultCell">
+              <ng-container *ngTemplateOutlet="cellTemplate; context: { $implicit: row[column.key], row: row, column: column }"></ng-container>
+            </ng-container>
+            <ng-template #defaultCell>
+              {{ row[column.key] }}
+            </ng-template>
+          </td>
+          <td class="action-column">
+            <button class="delete-btn" (click)="deleteRow(row)" title="Törlés">
+              <svg viewBox="0 0 24 24" width="16" height="16">
+                <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19V4M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+              </svg>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="data.length === 0">
+          <td [attr.colspan]="columns.length + 1" class="no-data">
+            Nincs megjeleníthető adat.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

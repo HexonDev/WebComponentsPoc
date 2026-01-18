@@ -1,0 +1,102 @@
+@model YourNamespace.Models.TableViewModel
+
+@{
+    ViewData["Title"] = "Data Table Example";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewData["Title"]</title>
+    
+    @* Web Component bundle betöltése *@
+    <script src="~/js/data-table-element.js"></script>
+</head>
+<body>
+    <h1>ASP.NET MVC Web Component Példa</h1>
+
+    @* 1. MEGOLDÁS: Kezdeti attribútum, majd property-re váltás *@
+    <div class="container">
+        <h2>Adattábla - AJAX új sor hozzáadással</h2>
+        
+        @* Kezdetben attribútummal rendereljük a server-side adatokat *@
+        <data-table 
+            id="myTable"
+            columns='@Html.Raw(Json.Serialize(Model.Columns))'
+            data='@Html.Raw(Json.Serialize(Model.Data))'>
+        </data-table>
+
+        <button onclick="addNewRow()">Új sor hozzáadása (AJAX)</button>
+    </div>
+
+    <script>
+        // A táblázat referencia
+        let table = null;
+
+        // Amikor a custom element betöltődött
+        customElements.whenDefined('data-table').then(() => {
+            table = document.getElementById('myTable');
+            
+            // Innentől property-alapúan dolgozunk, nem attribútummal!
+            console.log('Táblázat inicializálva:', table.data.length, 'sor');
+        });
+
+        // Új sor hozzáadása AJAX-szal
+        function addNewRow() {
+            // 1. AJAX hívás a backend-hez
+            fetch('/api/table/add-row', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    // új sor adatok
+                })
+            })
+            .then(response => response.json())
+            .then(newRow => {
+                // 2. Property-alapú frissítés (GYORS)
+                table.data = [newRow, ...table.data];
+                
+                // ALTERNATÍVA: Attribútum frissítés (LASSÚ - NEM AJÁNLOTT)
+                // table.setAttribute('data', JSON.stringify([newRow, ...table.data]));
+            })
+            .catch(error => console.error('Hiba:', error));
+        }
+    </script>
+
+    @* 2. MEGOLDÁS: Window property használata *@
+    <div class="container" style="margin-top: 40px;">
+        <h2>Adattábla - Window property-vel</h2>
+        
+        @* Server-side adatok a window objektumba *@
+        <script>
+            window.tableConfig = {
+                columns: @Html.Raw(Json.Serialize(Model.Columns)),
+                data: @Html.Raw(Json.Serialize(Model.Data))
+            };
+        </script>
+        
+        @* Automatikusan betölti a window.tableConfig-ból *@
+        <data-table id="windowTable"></data-table>
+
+        <button onclick="addRowToWindowTable()">Új sor hozzáadása</button>
+    </div>
+
+    <script>
+        function addRowToWindowTable() {
+            const table = document.getElementById('windowTable');
+            
+            fetch('/api/table/add-row', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(newRow => {
+                // Property-vel frissítjük
+                table.data = [newRow, ...table.data];
+            });
+        }
+    </script>
+</body>
+</html>
