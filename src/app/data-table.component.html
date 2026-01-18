@@ -1,5 +1,18 @@
-<div class="data-table-container">
+<div class="data-table-container" [class.loading]="isLoading">
   <div class="table-container">
+    <!-- Loading Overlay -->
+    <div *ngIf="isLoading" class="loading-overlay">
+      <div class="spinner"></div>
+      <span>Adatok betöltése...</span>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="error" class="error-message">
+      <span class="error-icon">⚠️</span>
+      {{ error }}
+      <button (click)="retry.emit()" class="retry-btn">Újra</button>
+    </div>
+
     <table class="data-table">
       <thead>
         <tr>
@@ -15,12 +28,7 @@
       <tbody>
         <tr *ngFor="let row of data">
           <td *ngFor="let column of columns">
-            <ng-container *ngIf="cellTemplate; else defaultCell">
-              <ng-container *ngTemplateOutlet="cellTemplate; context: { $implicit: row[column.key], row: row, column: column }"></ng-container>
-            </ng-container>
-            <ng-template #defaultCell>
-              {{ row[column.key] }}
-            </ng-template>
+            {{ row[column.key] }}
           </td>
           <td class="action-column">
             <button class="delete-btn" (click)="deleteRow(row)" title="Törlés">
@@ -30,7 +38,7 @@
             </button>
           </td>
         </tr>
-        <tr *ngIf="data.length === 0">
+        <tr *ngIf="data.length === 0 && !isLoading && !error">
           <td [attr.colspan]="columns.length + 1" class="no-data">
             Nincs megjeleníthető adat.
           </td>

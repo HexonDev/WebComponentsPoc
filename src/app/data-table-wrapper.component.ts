@@ -13,7 +13,17 @@ import { DataTableComponent, TableColumn } from './data-table.component';
   encapsulation: ViewEncapsulation.ShadowDom
 })
 export class DataTableWrapperComponent implements OnInit {
-  @Input() apiUrl: string = '';
+  @Input() 
+  set apiUrl(value: string) {
+    this._apiUrl = value;
+    if (value) {
+      this.fetchData();
+    }
+  }
+  get apiUrl(): string {
+    return this._apiUrl;
+  }
+  private _apiUrl: string = '';
   
   // Oszlopok belső meghatározása
   columns: TableColumn[] = [
@@ -31,12 +41,12 @@ export class DataTableWrapperComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
-    if (this.apiUrl) {
-      this.fetchData();
-    }
+    console.log('DataTableWrapperComponent initialized with apiUrl:', this.apiUrl);
   }
 
   fetchData(): void {
+    if (!this.apiUrl) return;
+    console.log('Fetching data from:', this.apiUrl);
     this.isLoading = true;
     this.error = null;
 
@@ -65,7 +75,6 @@ export class DataTableWrapperComponent implements OnInit {
   }
 
   onRowDeleted(row: any): void {
-    // Itt kezelhetjük a törlést, ha szükséges az API felé is visszajelezni
     console.log('Row deleted in wrapper:', row);
   }
 }

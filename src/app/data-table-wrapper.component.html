@@ -1,31 +1,19 @@
-<div class="wrapper-container" [class.loading]="isLoading">
-  <!-- Loading Overlay -->
-  <div *ngIf="isLoading" class="loading-overlay">
-    <div class="spinner"></div>
-    <span>Adatok betöltése...</span>
-  </div>
-
-  <!-- Error Message -->
-  <div *ngIf="error" class="error-message">
-    <span class="error-icon">⚠️</span>
-    {{ error }}
-    <button (click)="fetchData()" class="retry-btn">Újra</button>
-  </div>
-
-  <!-- Internal Table with pre-configured template -->
+<div class="wrapper-container">
+  <!-- Internal Table -->
   <app-data-table 
     [columns]="columns" 
     [data]="data"
-    [cellTemplate]="internalTemplate"
+    [isLoading]="isLoading"
+    [error]="error"
     (dataChanged)="onDataChanged($event)"
-    (rowDeleted)="onRowDeleted($event)">
+    (rowDeleted)="onRowDeleted($event)"
+    (retry)="fetchData()">
   </app-data-table>
 
   <!-- Internal Template Definition -->
   <ng-template #internalTemplate let-value let-row="row" let-column="column">
     <div class="custom-cell">
-      <span *ngIf="column.key === 'email'" class="email-badge"><a [href]="value">{{ value }}</a></span>
-      <span *ngIf="column.key !== 'email'">{{ value }}</span>
+      <span>{{ value }}</span>
     </div>
   </ng-template>
 </div>

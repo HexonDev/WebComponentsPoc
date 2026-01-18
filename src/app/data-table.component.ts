@@ -62,6 +62,8 @@ function parseDataAttribute(value: string | any[]): any[] {
     return this._data;
   }
   @Input() cellTemplate: TemplateRef<any> | null = null;
+  @Input() isLoading = false;
+  @Input() error: string | null = null;
   
   private _data: any[] = [];
   
@@ -69,6 +71,7 @@ function parseDataAttribute(value: string | any[]): any[] {
   @Output() rowAdded = new EventEmitter<any>();
   @Output() rowDeleted = new EventEmitter<any>();
   @Output() dataChanged = new EventEmitter<any[]>();
+  @Output() retry = new EventEmitter<void>();
   
   // Attribútum-alapú event handler-ek (callback függvény nevek)
   @Input('on-row-added') onRowAddedCallback?: string;
